@@ -22,6 +22,21 @@
       <CodeBase>$PackageFolder$\\NuGet.PackageManagement.UI.dll</CodeBase>
     </AssemblyAttributes>
     <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
+      <AssemblyName>NuGetConsole.Host.PowerShell</AssemblyName>
+      <Version>$(SemanticVersion).$(PreReleaseVersion)</Version>
+      <CodeBase>$PackageFolder$\\NuGetConsole.Host.PowerShell.dll</CodeBase>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
+      <AssemblyName>NuGet.PackageManagement.PowerShellCmdlets</AssemblyName>
+      <Version>$(SemanticVersion).$(PreReleaseVersion)</Version>
+      <CodeBase>$PackageFolder$\\NuGet.PackageManagement.PowerShellCmdlets.dll</CodeBase>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
+      <AssemblyName>NuGet.SolutionRestoreManager</AssemblyName>
+      <Version>$(SemanticVersion).$(PreReleaseVersion)</Version>
+      <CodeBase>$PackageFolder$\\NuGet.SolutionRestoreManager.dll</CodeBase>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
       <AssemblyName>NuGet.Common</AssemblyName>
       <Version>$(SemanticVersion).$(NetCoreAssemblyBuildNumber)</Version>
       <CodeBase>$PackageFolder$\\NuGet.Common.dll</CodeBase>
@@ -105,6 +120,16 @@
       <AssemblyName>NuGet.DependencyResolver.Core</AssemblyName>
       <Version>$(SemanticVersion).$(NetCoreAssemblyBuildNumber)</Version>
       <CodeBase>$PackageFolder$\\NuGet.DependencyResolver.Core.dll</CodeBase>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
+      <AssemblyName>NuGet.Build.Tasks</AssemblyName>
+      <Version>$(SemanticVersion).$(NetCoreAssemblyBuildNumber)</Version>
+      <CodeBase>$PackageFolder$\\NuGet.Build.Tasks.dll</CodeBase>
+    </AssemblyAttributes>
+    <AssemblyAttributes Include="Microsoft.VisualStudio.Shell.ProvideCodeBase">
+      <AssemblyName>NuGet.VisualStudio.Implementation</AssemblyName>
+      <Version>$(SemanticVersion).$(NetCoreAssemblyBuildNumber)</Version>
+      <CodeBase>$PackageFolder$\\NuGet.VisualStudio.Implementation.dll</CodeBase>
     </AssemblyAttributes>
   </ItemGroup>
 </Project>
