@@ -66,6 +66,13 @@ phases:
         gci env:* | sort-object name
 
   - task: PowerShell@1
+    displayName: "Git clean"
+    inputs:
+      scriptType: "inlineScript"
+      inlineScript: |
+        git clean -xdf
+
+  - task: PowerShell@1
     inputs:
       scriptName: "$(Build.Repository.LocalPath)\\configure.ps1"
       arguments: "-Force -CI"
