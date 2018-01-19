@@ -64,14 +64,7 @@ phases:
       inlineScript: |
         Write-Host "##vso[build.updatebuildnumber]$env:BuildNumber"
         gci env:* | sort-object name
-
-  - task: PowerShell@1
-    displayName: "Git clean"
-    inputs:
-      scriptType: "inlineScript"
-      inlineScript: |
-        git clean -xdf
-
+        
   - task: PowerShell@1
     inputs:
       scriptName: "$(Build.Repository.LocalPath)\\configure.ps1"
@@ -198,7 +191,7 @@ phases:
       solution: "build\\build.proj"
       msbuildVersion: "15.0"
       configuration: "$(BuildConfiguration)"
-      msbuildArguments: "/t:BuildVS15VSIX /p:BuildRTM=$(BuildRTM) /p:ExcludeTestProjects=$(BuildRTM) /p:IsCIBuild=true /v:diag"
+      msbuildArguments: "/t:BuildVS15VSIX /p:BuildRTM=$(BuildRTM) /p:ExcludeTestProjects=$(BuildRTM) /p:IsCIBuild=true /p:BuildNumber=$(BuildNumber)"
     condition: "and(succeeded(),eq(variables['BuildRTM'], 'false'))"
 
   - task: CopyFiles@2
