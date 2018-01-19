@@ -198,8 +198,16 @@ phases:
       solution: "build\\build.proj"
       msbuildVersion: "15.0"
       configuration: "$(BuildConfiguration)"
-      msbuildArguments: "/t:BuildVS15VSIX /p:BuildRTM=$(BuildRTM) /p:ExcludeTestProjects=$(BuildRTM) /p:IsCIBuild=true"
+      msbuildArguments: "/t:BuildVS15VSIX /p:BuildRTM=$(BuildRTM) /p:ExcludeTestProjects=$(BuildRTM) /p:IsCIBuild=true /v:diag"
     condition: "and(succeeded(),eq(variables['BuildRTM'], 'false'))"
+
+  - task: CopyFiles@2
+    displayName: "Copy Everything"
+    inputs:
+      SourceFolder: "artifacts\\NuGet.VisualStudio.Client"
+      Contents: "**\\*"
+      TargetFolder: "$(BuildOutputTargetPath)\\artifacts\\$(VsixPublishDir)\\NuGet.VisualStudio.Client"
+    condition: "always()"
 
   - task: MSBuild@1
     displayName: "Sign VSIX"
