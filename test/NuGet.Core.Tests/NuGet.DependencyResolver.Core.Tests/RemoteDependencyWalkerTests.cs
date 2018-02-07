@@ -793,55 +793,6 @@ namespace NuGet.DependencyResolver.Tests
             Assert.False(isGreater);
         }
 
-        [Fact]
-        public async Task SetPrivateAssetsOnPackagewithDevelopmentDependencyTrue()
-        {
-            var context = new TestRemoteWalkContext();
-            var provider = new DependencyProvider();
-            provider.Package("A", "1.0")
-                    .DependsOn("B", "1.0");
-
-            provider.Package("B", "1.0");
-
-            provider.DevelopmentDependencies.Add("B", true);
-
-            context.LocalLibraryProviders.Add(provider);
-            var walker = new RemoteDependencyWalker(context);
-            var node = await DoWalkAsync(walker, "A");
-
-            var packageB = node.Item.Data.Dependencies.First(dependency => dependency.Name.Equals("B"));
-
-            var expectedSuppressParent = LibraryIncludeFlags.All;
-            var expectedIncludeFlags = LibraryIncludeFlags.All & ~LibraryIncludeFlags.Runtime;
-
-            Assert.NotNull(packageB);
-            Assert.Equal(expectedSuppressParent, packageB.SuppressParent);
-            Assert.Equal(expectedIncludeFlags, packageB.IncludeType);
-        }
-
-        [Fact]
-        public async Task AvoidDependencyWithDevelopmentDependency()
-        {
-            var context = new TestRemoteWalkContext();
-            var provider = new DependencyProvider();
-            provider.Package("A", "1.0")
-                .DependsOn("B", "1.0");
-
-            provider.Package("B", "1.0")
-                .DependsOn("C", "1.0");
-
-            provider.Package("C", "1.0");
-
-            provider.DevelopmentDependencies.Add("C", true);
-
-            context.LocalLibraryProviders.Add(provider);
-            var walker = new RemoteDependencyWalker(context);
-            var node = await DoWalkAsync(walker, "A");
-
-            Assert.False(node.Item.Data.Dependencies.Any(dependency => dependency.Name.Equals("C")));
-            Assert.True(node.Item.Data.Dependencies.Any(dependency => dependency.Name.Equals("B")));
-        }
-
         private void AssertPath<TItem>(GraphNode<TItem> node, params string[] items)
         {
             var matches = new List<string>();
@@ -871,8 +822,6 @@ namespace NuGet.DependencyResolver.Tests
         {
             private readonly Dictionary<LibraryIdentity, List<LibraryDependency>> _graph = new Dictionary<LibraryIdentity, List<LibraryDependency>>();
 
-            public Dictionary<string, bool> DevelopmentDependencies = new Dictionary<string, bool>();
-
             public bool IsHttp
             {
                 get
@@ -882,20 +831,6 @@ namespace NuGet.DependencyResolver.Tests
             }
 
             public PackageSource Source => new PackageSource("Test");
-
-            public Task<bool> GetDevelopmentDependencyAsync(
-                LibraryIdentity libraryIdentity,
-                 SourceCacheContext cacheContext,
-                ILogger logger,
-                CancellationToken cancellationToken)
-            {
-                if (DevelopmentDependencies.TryGetValue(libraryIdentity.Name, out var developmentDependency))
-                {
-                    return Task.FromResult(developmentDependency);
-                }
-
-                return Task.FromResult(false);
-            }
 
             public Task<IPackageDownloader> GetPackageDownloaderAsync(
                 PackageIdentity packageIdentity,

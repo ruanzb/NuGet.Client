@@ -98,8 +98,6 @@ namespace NuGet.DependencyResolver
         {
             LibraryDependencyInfo dependencies;
 
-            var developmentDependencyFlag = false;
-
             // For local matches such as projects get the dependencies from the LocalLibrary property.
             var localMatch = match as LocalMatch;
 
@@ -119,12 +117,6 @@ namespace NuGet.DependencyResolver
                     cacheContext,
                     logger,
                     cancellationToken);
-
-                developmentDependencyFlag = await match.Provider.GetDevelopmentDependencyAsync(
-                    match.Library,
-                    cacheContext,
-                    logger,
-                    cancellationToken);
             }
 
             // Copy the original identity to the remote match.
@@ -137,8 +129,7 @@ namespace NuGet.DependencyResolver
                 Data = new RemoteResolveResult
                 {
                     Match = match,
-                    Dependencies = dependencies.Dependencies,
-                    DevelopmentDependency = developmentDependencyFlag
+                    Dependencies = dependencies.Dependencies
                 },
             };
         }

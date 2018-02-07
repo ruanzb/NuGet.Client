@@ -117,21 +117,5 @@ namespace NuGet.DependencyResolver
             SourceCacheContext cacheContext,
             ILogger logger,
             CancellationToken token);
-
-        /// <summary>
-        /// Asynchronously gets developmentDependency flag value from package nuspec file.
-        /// </summary>
-        /// <param name="libraryIdentity">A package identity.</param>
-        /// <param name="cacheContext">A source cache context.</param>
-        /// <param name="logger">A logger.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation.
-        /// The task result (<see cref="Task{TResult}.Result" />) returns a bool which
-        /// indicates if developmentDependency is set to true else false.</returns>
-        Task<bool> GetDevelopmentDependencyAsync(
-            LibraryIdentity libraryIdentity,
-             SourceCacheContext cacheContext,
-            ILogger logger,
-            CancellationToken cancellationToken);
     }
 }

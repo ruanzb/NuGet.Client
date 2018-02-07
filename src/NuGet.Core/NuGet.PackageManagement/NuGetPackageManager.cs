@@ -2666,7 +2666,8 @@ namespace NuGet.PackageManagement
                     }
                 }
 
-                LockFileBuilder.UpdatePackageReferenceMetadata(projectAction.RestoreResult.LockFile.PackageSpec, projectAction.RestoreResult.RestoreGraphs);
+                var pathContext = NuGetPathContext.Create(Settings);
+                var pathResolver = new FallbackPackagePathResolver(pathContext);
 
                 foreach (var originalAction in projectAction.OriginalActions.Where(e => !ignoreActions.Contains(e)))
                 {
@@ -2674,6 +2675,11 @@ namespace NuGet.PackageManagement
                     {
                         if (buildIntegratedProject.ProjectStyle == ProjectStyle.PackageReference)
                         {
+                            BuildIntegratedRestoreUtility.UpdatePackageReferenceMetadata(
+                                projectAction.RestoreResult.LockFile.PackageSpec,
+                                pathResolver,
+                                originalAction.PackageIdentity);
+
                             var framework = projectAction.InstallationContext.SuccessfulFrameworks.FirstOrDefault();
                             var resolvedAction = projectAction.RestoreResult.LockFile.PackageSpec.TargetFrameworks.FirstOrDefault(fm => fm.FrameworkName.Equals(framework))
                                 .Dependencies.First(dependency => dependency.Name.Equals(originalAction.PackageIdentity.Id, StringComparison.OrdinalIgnoreCase));
@@ -2701,8 +2707,6 @@ namespace NuGet.PackageManagement
 
                 var logger = new ProjectContextLogger(nuGetProjectContext);
                 var referenceContext = new DependencyGraphCacheContext(logger, Settings);
-                var pathContext = NuGetPathContext.Create(Settings);
-                var pathResolver = new FallbackPackagePathResolver(pathContext);
 
                 var now = DateTime.UtcNow;
                 Action<SourceCacheContext> cacheContextModifier = c => c.MaxAge = now;

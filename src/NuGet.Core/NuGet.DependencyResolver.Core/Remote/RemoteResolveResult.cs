@@ -10,7 +10,5 @@ namespace NuGet.DependencyResolver
     {
         public RemoteMatch Match { get; set; }
         public IEnumerable<LibraryDependency> Dependencies { get; set; }
-
-        public bool DevelopmentDependency { get; set; }
     }
 }

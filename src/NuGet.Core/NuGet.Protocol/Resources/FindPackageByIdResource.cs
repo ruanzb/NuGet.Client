@@ -114,23 +114,6 @@ namespace NuGet.Protocol.Core.Types
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// Asynchronously gets developmentDependency flag from .nuspec for a package identity.
-        /// </summary>
-        /// <param name="id">A package ID.</param>
-        /// <param name="version">A package version.</param>
-        /// <param name="cacheContext">A source cache context.</param>
-        /// <param name="logger">A logger.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. And returns a bool 
-        /// for developmentDependency flag.</returns>
-        public abstract Task<bool> GetDevelopmentDependencyAsync(
-            string id,
-            NuGetVersion version,
-            SourceCacheContext cacheContext,
-            ILogger logger,
-            CancellationToken cancellationToken);
-
-        /// <summary>
         /// Read dependency info from a nuspec.
         /// </summary>
         /// <remarks>This also verifies minClientVersion.</remarks>
@@ -145,15 +128,6 @@ namespace NuGet.Protocol.Core.Types
                 reader.GetIdentity(),
                 reader.GetDependencyGroups(),
                 reader.GetFrameworkReferenceGroups());
-        }
-
-        protected static bool GetDevelopmentDependency(NuspecReader reader)
-        {
-            // Since this is the first place a package is read after selecting it as the best version
-            // check the minClientVersion here to verify we are okay to read this package.
-            MinClientVersionUtility.VerifyMinClientVersion(reader);
-
-            return reader.GetDevelopmentDependency();
         }
     }
 }

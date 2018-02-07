@@ -546,49 +546,5 @@ namespace NuGet.Commands
             return packageVersions;
         }
 
-        /// <summary>
-        /// Asynchronously gets developmentDependency flag value from package nuspec file.
-        /// </summary>
-        /// <param name="libraryIdentity">A package identity.</param>
-        /// <param name="cacheContext">A source cache context.</param>
-        /// <param name="logger">A logger.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation.
-        /// The task result (<see cref="Task{TResult}.Result" />) returns a bool which
-        /// indicates if developmentDependency is set to true else false.</returns>
-        public async Task<bool> GetDevelopmentDependencyAsync(
-            LibraryIdentity libraryIdentity,
-             SourceCacheContext cacheContext,
-            ILogger logger,
-            CancellationToken cancellationToken)
-        {
-            await EnsureResource();
-            try
-            {
-                if (_throttle != null)
-                {
-                    await _throttle.WaitAsync();
-                }
-
-                return await _findPackagesByIdResource.GetDevelopmentDependencyAsync(
-                    libraryIdentity.Name,
-                    libraryIdentity.Version,
-                    cacheContext,
-                    logger,
-                    cancellationToken);
-            }
-            catch (FatalProtocolException e) when (_ignoreFailedSources)
-            {
-                if (!_ignoreWarning)
-                {
-                    await _logger.LogAsync(RestoreLogMessage.CreateWarning(NuGetLogCode.NU1801, e.Message, libraryIdentity.Name));
-                }
-                return false;
-            }
-            finally
-            {
-                _throttle?.Release();
-            }
-        }
     }
 }

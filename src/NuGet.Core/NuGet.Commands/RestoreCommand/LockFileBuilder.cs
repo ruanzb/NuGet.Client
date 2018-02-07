@@ -279,54 +279,6 @@ namespace NuGet.Commands
             return lockFile;
         }
 
-        public static void UpdatePackageReferenceMetadata(PackageSpec project, IEnumerable<RestoreTargetGraph> targetGraphs)
-        {
-            // For NETCore put everything under a TFM section
-            // Projects are included for NETCore
-            foreach (var frameworkInfo in project.TargetFrameworks
-                .OrderBy(framework => framework.FrameworkName.ToString(),
-                    StringComparer.Ordinal))
-            {
-                var targetGraph = targetGraphs.SingleOrDefault(graph =>
-                    graph.Framework.Equals(frameworkInfo.FrameworkName)
-                    && string.IsNullOrEmpty(graph.RuntimeIdentifier));
-
-                var resolvedEntry = targetGraph?
-                    .Flattened
-                    .SingleOrDefault(library => library.Key.Name.Equals(project.Name, StringComparison.OrdinalIgnoreCase));
-
-                Debug.Assert(resolvedEntry != null, "Unable to find project entry in target graph, project references will not be added");
-
-                // In some failure cases where there is a conflict the root level project cannot be resolved, this should be handled gracefully
-                if (resolvedEntry != null)
-                {
-                    // go through each package dependency and set SuppressParent and IncludeType flags
-                    foreach (var dependency in frameworkInfo.Dependencies)
-                    {
-                        // ignore if author has already overwritten PrivateAssets flag.
-                        if (dependency.SuppressParent == LibraryIncludeFlagUtils.DefaultSuppressParent)
-                        {
-                            // resolvedDependency will have these SuppressParent and IncludeType flag set based on developmentDependency
-                            var resolvedDependency = resolvedEntry.Data.Dependencies.First(dep => dep.Name.Equals(dependency.Name, StringComparison.OrdinalIgnoreCase));
-
-                            if (resolvedDependency != null)
-                            {
-                                if (resolvedDependency.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
-                                {
-                                    dependency.SuppressParent = resolvedDependency.SuppressParent;
-                                }
-
-                                if (resolvedDependency.IncludeType != LibraryIncludeFlags.All)
-                                {
-                                    dependency.IncludeType = resolvedDependency.IncludeType;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         private static string GetFallbackFrameworkString(NuGetFramework framework)
         {
             var frameworks = (framework as AssetTargetFallbackFramework)?.Fallback

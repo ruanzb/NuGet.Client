@@ -655,46 +655,6 @@ namespace NuGet.Commands.Test
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task GetPackageDownloaderAsync_GetDevelopmentDependencyAsync(bool developmentDependency)
-        {
-            // Arrange
-            var testLogger = new TestLogger();
-            var cacheContext = new SourceCacheContext();
-
-            var findResource = new Mock<FindPackageByIdResource>();
-            findResource.Setup(x => x.GetDevelopmentDependencyAsync(
-                        It.IsNotNull<string>(),
-                        It.IsNotNull<NuGetVersion>(),
-                        It.IsNotNull<SourceCacheContext>(),
-                        It.IsNotNull<ILogger>(),
-                        It.IsAny<CancellationToken>()))
-                    .ReturnsAsync(developmentDependency);
-
-            var source = new Mock<SourceRepository>();
-            source.Setup(s => s.GetResourceAsync<FindPackageByIdResource>())
-                .ReturnsAsync(findResource.Object);
-            source.SetupGet(s => s.PackageSource)
-                .Returns(new PackageSource("http://test/index.json"));
-
-            var provider = new SourceRepositoryDependencyProvider(
-                source.Object,
-                testLogger,
-                cacheContext,
-                ignoreFailedSources: true,
-                ignoreWarning: true);
-
-            var ddFlag = await provider.GetDevelopmentDependencyAsync(
-                    new LibraryIdentity("a", NuGetVersion.Parse("1.0.0"), LibraryType.Package),
-                    cacheContext,
-                    NullLogger.Instance,
-                    CancellationToken.None);
-
-            Assert.Equal(developmentDependency, ddFlag);
-        }
-
         private sealed class SourceRepositoryDependencyProviderTest : IDisposable
         {
             internal TestLogger Logger { get; }

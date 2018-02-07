@@ -162,15 +162,6 @@ namespace NuGet.DependencyResolver.Core.Tests
             {
                 throw new NotImplementedException();
             }
-
-            public Task<bool> GetDevelopmentDependencyAsync(
-                LibraryIdentity libraryIdentity,
-                 SourceCacheContext cacheContext,
-                ILogger logger,
-                CancellationToken cancellationToken)
-            {
-                return Task.FromResult(false);
-            }
         }
     }
 }

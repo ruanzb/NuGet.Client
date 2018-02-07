@@ -183,24 +183,8 @@ namespace NuGet.DependencyResolver
                 // Extract the resolved node
                 tasks.Remove(task);
                 var dependencyNode = await task;
-
-                // check if developmentDependency is set in package nuspec file anc accordingly update
-                // dependency SuppressParent and IncludeType flags
-                if (dependencyNode.Item.Data.DevelopmentDependency)
-                {
-                    var dependency = node.Item.Data.Dependencies.First(d => d.LibraryRange.Name.Equals(dependencyNode.Item.Data.Match.Library.Name, StringComparison.OrdinalIgnoreCase));
-
-                    if (dependency.SuppressParent == LibraryIncludeFlagUtils.DefaultSuppressParent)
-                    {
-                        dependency.SuppressParent = LibraryIncludeFlags.All;
-                    }
-                    if (dependency.IncludeType == LibraryIncludeFlags.All)
-                    {
-                        dependency.IncludeType = LibraryIncludeFlags.All & ~LibraryIncludeFlags.Runtime;
-                    }
-                }
-
                 dependencyNode.OuterNode = node;
+
                 node.InnerNodes.Add(dependencyNode);
             }
 

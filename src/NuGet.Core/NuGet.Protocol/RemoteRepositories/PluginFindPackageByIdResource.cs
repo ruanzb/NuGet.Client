@@ -185,62 +185,6 @@ namespace NuGet.Protocol.Core.Types
         }
 
         /// <summary>
-        /// Asynchronously gets developmentDependency flag from .nuspec for a package identity.
-        /// </summary>
-        /// <param name="id">A package ID.</param>
-        /// <param name="version">A package version.</param>
-        /// <param name="cacheContext">A source cache context.</param>
-        /// <param name="logger">A logger.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>A task that represents the asynchronous operation. And returns a bool 
-        /// for developmentDependency flag.</returns>
-        public override async Task<bool> GetDevelopmentDependencyAsync(
-            string id,
-            NuGetVersion version,
-            SourceCacheContext cacheContext,
-            ILogger logger,
-            CancellationToken cancellationToken)
-        {
-            if (string.IsNullOrEmpty(id))
-            {
-                throw new ArgumentException(Strings.ArgumentCannotBeNullOrEmpty, nameof(id));
-            }
-
-            if (version == null)
-            {
-                throw new ArgumentNullException(nameof(version));
-            }
-
-            if (cacheContext == null)
-            {
-                throw new ArgumentNullException(nameof(cacheContext));
-            }
-
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var packageInfos = await EnsurePackagesAsync(id, cacheContext, logger, cancellationToken);
-
-            PackageInfo packageInfo;
-
-            if (packageInfos.TryGetValue(version, out packageInfo))
-            {
-                using (var packageReader = new PluginPackageReader(_plugin, packageInfo.Identity, _packageSource.Source))
-                {
-                    var nuspecReader = await packageReader.GetNuspecReaderAsync(cancellationToken);
-
-                    return GetDevelopmentDependency(nuspecReader);
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Asynchronously gets dependency information for a specific package.
         /// </summary>
         /// <param name="id">A package id.</param>
