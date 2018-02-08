@@ -283,17 +283,14 @@ namespace NuGet.PackageManagement.VisualStudio
                         originalFramework);
 
                     // SuppressParent could be set to All if developmentDependency flag is true in package nuspec file.
-                    if (installationContext.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
+                    if (installationContext.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent &&
+                        installationContext.IncludeType != LibraryIncludeFlags.All)
                     {
                         await SetPackagePropertyValueAsync(
                             reference.Metadata,
                             ProjectItemProperties.PrivateAssets,
                             LibraryIncludeFlagUtils.GetFlagString(installationContext.SuppressParent).Replace(',', ';'));
-                    }
 
-                    // it might exlude Runtime if developmentDependency flag is true in package nuspec file.
-                    if (installationContext.IncludeType != LibraryIncludeFlags.All)
-                    {
                         await SetPackagePropertyValueAsync(
                             reference.Metadata,
                             ProjectItemProperties.IncludeAssets,
@@ -318,16 +315,14 @@ namespace NuGet.PackageManagement.VisualStudio
                     await existingReference.Metadata.SetPropertyValueAsync("Version", formattedRange);
                 }
 
-                if (installationContext.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent)
+                if (installationContext.SuppressParent != LibraryIncludeFlagUtils.DefaultSuppressParent &&
+                    installationContext.IncludeType != LibraryIncludeFlags.All)
                 {
                     await SetPackagePropertyValueAsync(
                         result.Reference.Metadata,
                         ProjectItemProperties.PrivateAssets,
                         LibraryIncludeFlagUtils.GetFlagString(installationContext.SuppressParent).Replace(',', ';'));
-                }
 
-                if (installationContext.IncludeType != LibraryIncludeFlags.All)
-                {
                     await SetPackagePropertyValueAsync(
                         result.Reference.Metadata,
                         ProjectItemProperties.IncludeAssets,

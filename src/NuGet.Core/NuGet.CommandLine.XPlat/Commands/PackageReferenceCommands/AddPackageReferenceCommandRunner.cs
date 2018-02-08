@@ -12,6 +12,7 @@ using NuGet.Common;
 using NuGet.Configuration;
 using NuGet.Frameworks;
 using NuGet.LibraryModel;
+using NuGet.Packaging;
 using NuGet.Packaging.Core;
 using NuGet.ProjectModel;
 using NuGet.Protocol.Core.Types;
@@ -36,9 +37,9 @@ namespace NuGet.CommandLine.XPlat
                 var libraryDependency = new LibraryDependency
                 {
                     LibraryRange = new LibraryRange(
-                    name: packageReferenceArgs.PackageDependency.Id,
-                    versionRange: packageReferenceArgs.PackageDependency.VersionRange,
-                    typeConstraint: LibraryDependencyTarget.Package)
+                        name: packageReferenceArgs.PackageDependency.Id,
+                        versionRange: packageReferenceArgs.PackageDependency.VersionRange,
+                        typeConstraint: LibraryDependencyTarget.Package)
                 };
 
                 msBuild.AddPackageReference(packageReferenceArgs.ProjectPath, libraryDependency);
@@ -156,11 +157,8 @@ namespace NuGet.CommandLine.XPlat
                     packageReferenceArgs.PackageDependency.Id,
                     packageReferenceArgs.ProjectPath));
 
-                // If the user did not specify a version then update the version to resolved version
-                UpdatePackageVersionIfNeeded(restorePreviewResult, packageReferenceArgs, userSpecifiedFrameworks);
-
                 // generate a library dependency with all the metadata like Include, Exlude and SuppressParent
-                var libraryDependency = GenerateLibraryDependency(updatedPackageSpec, packageReferenceArgs, restorePreviewResult.Result.RestoreGraphs, userSpecifiedFrameworks);
+                var libraryDependency = GenerateLibraryDependency(updatedPackageSpec, packageReferenceArgs, restorePreviewResult, userSpecifiedFrameworks);
 
                 msBuild.AddPackageReference(packageReferenceArgs.ProjectPath, libraryDependency);
             }
@@ -177,11 +175,8 @@ namespace NuGet.CommandLine.XPlat
                     .OriginalTargetFrameworks
                     .Where(s => compatibleFrameworks.Contains(NuGetFramework.Parse(s)));
 
-                // If the user did not specify a version then update the version to resolved version
-                UpdatePackageVersionIfNeeded(restorePreviewResult, packageReferenceArgs, userSpecifiedFrameworks);
-
                 // generate a library dependency with all the metadata like Include, Exlude and SuppressParent
-                var libraryDependency = GenerateLibraryDependency(updatedPackageSpec, packageReferenceArgs, restorePreviewResult.Result.RestoreGraphs, userSpecifiedFrameworks);
+                var libraryDependency = GenerateLibraryDependency(updatedPackageSpec, packageReferenceArgs, restorePreviewResult, userSpecifiedFrameworks);
 
                 msBuild.AddPackageReferencePerTFM(packageReferenceArgs.ProjectPath,
                     libraryDependency,
@@ -194,43 +189,59 @@ namespace NuGet.CommandLine.XPlat
         private static LibraryDependency GenerateLibraryDependency(
             PackageSpec project,
             PackageReferenceArgs packageReferenceArgs,
-            IEnumerable<RestoreTargetGraph> targetGraphs,
+            RestoreResultPair restorePreviewResult,
             IEnumerable<NuGetFramework> UserSpecifiedFrameworks)
         {
-            if (packageReferenceArgs.Frameworks?.Any() == true)
+            // get the package resolved version from restore preview result
+            var resolvedVersion = GetPackageVersionFromRestoreResult(restorePreviewResult, packageReferenceArgs, UserSpecifiedFrameworks);
+
+            // create a path resolver to get nuspec file of the package
+            var pathResolver = new FallbackPackagePathResolver(
+                project.RestoreMetadata.PackagesPath,
+                project.RestoreMetadata.FallbackFolders);
+            var info = pathResolver.GetPackageInfo(packageReferenceArgs.PackageDependency.Id, resolvedVersion);
+            var nuspecFilePath = info?.PathResolver.GetManifestFileName(packageReferenceArgs.PackageDependency.Id, resolvedVersion);
+
+            // read development dependency from nuspec file
+            var developmentDependency = new NuspecReader(nuspecFilePath).GetDevelopmentDependency();
+
+            if (developmentDependency)
             {
-                // If the user specified frameworks then we get the flattened graphs  only from the compatible frameworks.
-                var userSpecifiedFrameworkSet = new HashSet<NuGetFramework>(
-                    UserSpecifiedFrameworks,
-                    new NuGetFrameworkFullComparer());
-
-                targetGraphs = targetGraphs
-                    .Where(r => userSpecifiedFrameworkSet.Contains(r.Framework));
-            }
-
-            foreach (var restoreGraph in targetGraphs)
-            {
-                var resolvedEntry = restoreGraph
-                    .Flattened
-                    .SingleOrDefault(p => p.Key.Name.Equals(project.Name, StringComparison.OrdinalIgnoreCase));
-
-                if (resolvedEntry != null)
+                foreach (var frameworkInfo in project.TargetFrameworks
+                    .OrderBy(framework => framework.FrameworkName.ToString(),
+                        StringComparer.Ordinal))
                 {
-                    var resolvedDependency = resolvedEntry.Data.Dependencies.First(
+                    var dependency = frameworkInfo.Dependencies.First(
                         dep => dep.Name.Equals(packageReferenceArgs.PackageDependency.Id, StringComparison.OrdinalIgnoreCase));
 
-                    if (resolvedDependency != null)
+                    // if suppressParent and IncludeType aren't set by user, then only update those as per dev dependency
+                    if (dependency?.SuppressParent == LibraryIncludeFlagUtils.DefaultSuppressParent &&
+                        dependency?.IncludeType == LibraryIncludeFlags.All)
                     {
-                        return resolvedDependency;
+                        dependency.SuppressParent = LibraryIncludeFlags.All;
+                        dependency.IncludeType = LibraryIncludeFlags.All & ~LibraryIncludeFlags.Runtime;
+                    }
+
+                    if (dependency != null)
+                    {
+                        return dependency;
                     }
                 }
+            }
+
+            var version = packageReferenceArgs.PackageDependency.VersionRange;
+
+            // If the user did not specify a version then write the exact resolved version
+            if (packageReferenceArgs.NoVersion)
+            {
+                version = new VersionRange(resolvedVersion);
             }
 
             return new LibraryDependency
             {
                 LibraryRange = new LibraryRange(
                     name: packageReferenceArgs.PackageDependency.Id,
-                    versionRange: packageReferenceArgs.PackageDependency.VersionRange,
+                    versionRange: version,
                     typeConstraint: LibraryDependencyTarget.Package)
             };
         }
@@ -285,27 +296,6 @@ namespace NuGet.CommandLine.XPlat
             }
 
             return spec;
-        }
-
-        private static void UpdatePackageVersionIfNeeded(RestoreResultPair restorePreviewResult,
-            PackageReferenceArgs packageReferenceArgs,
-            IEnumerable<NuGetFramework> UserSpecifiedFrameworks)
-        {
-            // If the user did not specify a version then write the exact resolved version
-            if (packageReferenceArgs.NoVersion)
-            {
-                // Get the package version from the graph
-                var resolvedVersion = GetPackageVersionFromRestoreResult(restorePreviewResult, 
-                    packageReferenceArgs, 
-                    UserSpecifiedFrameworks);
-
-                if (resolvedVersion != null)
-                {
-                    //Update the packagedependency with the new version
-                    packageReferenceArgs.PackageDependency = new PackageDependency(packageReferenceArgs.PackageDependency.Id,
-                        new VersionRange(resolvedVersion));
-                }
-            }
         }
 
         private static NuGetVersion GetPackageVersionFromRestoreResult(RestoreResultPair restorePreviewResult,

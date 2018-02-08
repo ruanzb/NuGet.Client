@@ -2666,8 +2666,9 @@ namespace NuGet.PackageManagement
                     }
                 }
 
-                var pathContext = NuGetPathContext.Create(Settings);
-                var pathResolver = new FallbackPackagePathResolver(pathContext);
+                var pathResolver = new FallbackPackagePathResolver(
+                    projectAction.RestoreResult.LockFile.PackageSpec.RestoreMetadata.PackagesPath,
+                    projectAction.RestoreResult.LockFile.PackageSpec.RestoreMetadata.FallbackFolders);
 
                 foreach (var originalAction in projectAction.OriginalActions.Where(e => !ignoreActions.Contains(e)))
                 {
