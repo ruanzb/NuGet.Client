@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 #if IS_DESKTOP
 using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.X509Certificates;
@@ -30,7 +29,7 @@ namespace NuGet.Packaging.Signing
         {
             if (primarySignature.Type == SignatureType.Repository)
             {
-                throw new SignatureException(NuGetLogCode.NU3033, Strings.Error_RepositorySignatureShouldNotHaveARepositoryCountersignature);
+                throw new SignatureException(NuGetLogCode.NU3033, Strings.Error_RepositorySignatureMustNotHaveARepositoryCountersignature);
             }
 
             var counterSignatures = primarySignature.SignerInfo.CounterSignerInfos;
