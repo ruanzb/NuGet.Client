@@ -57,7 +57,7 @@ namespace NuGet.Commands
 
         public async Task<int> ExecuteCommandAsync(
             IEnumerable<string> packagesToSign,
-            AuthorSignPackageRequest signPackageRequest,
+            SignPackageRequest signPackageRequest,
             string timestamper,
             ILogger logger,
             string outputDirectory,
@@ -131,7 +131,7 @@ namespace NuGet.Commands
             ILogger logger,
             bool Overwrite,
             ISignatureProvider signatureProvider,
-            AuthorSignPackageRequest request,
+            SignPackageRequest request,
             CancellationToken token)
         {
             // For overwrite we need to first remove the signature and then sign the unsigned package
@@ -155,7 +155,7 @@ namespace NuGet.Commands
         private static async Task AddSignatureAndUpdatePackageAsync(
             ILogger logger,
             ISignatureProvider signatureProvider,
-            AuthorSignPackageRequest request,
+            SignPackageRequest request,
             string packagePath,
             string outputPath,
             CancellationToken token)

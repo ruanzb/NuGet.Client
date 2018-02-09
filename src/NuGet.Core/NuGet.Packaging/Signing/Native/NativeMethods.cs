@@ -36,6 +36,15 @@ namespace NuGet.Packaging.Signing
             IntPtr pRecipientInfo,
             IntPtr pStreamInfo);
 
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/aa380221(v=vs.85).aspx
+        [DllImport("crypt32.dll", SetLastError = true)]
+        public static extern bool CryptMsgCountersign(
+            SafeCryptMsgHandle hCryptMsg,
+            uint dwIndex,
+            int cCountersigners,
+            CMSG_SIGNER_ENCODE_INFO rgCountersigners
+            );
+
         // http://msdn.microsoft.com/en-us/library/windows/desktop/aa380219(v=vs.85).aspx
         [DllImport("crypt32.dll", SetLastError = true)]
         public static extern bool CryptMsgClose(IntPtr hCryptMsg);

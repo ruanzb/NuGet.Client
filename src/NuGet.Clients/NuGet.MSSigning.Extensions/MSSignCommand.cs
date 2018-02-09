@@ -73,7 +73,7 @@ namespace NuGet.MSSigning.Extensions
             }
         }
 
-        public AuthorSignPackageRequest GetSignRequest()
+        private AuthorSignPackageRequest GetSignRequest()
         {
             ValidatePackagePath();
             WarnIfNoTimestamper(Console);
@@ -98,7 +98,7 @@ namespace NuGet.MSSigning.Extensions
             return request;
         }
 
-        private IEnumerable<string> GetPackages()
+        protected IEnumerable<string> GetPackages()
         {
             // resolve path into multiple packages if needed.
             var packagesToSign = LocalFolderUtility.ResolvePackageFromPath(Arguments[0]);
@@ -107,7 +107,7 @@ namespace NuGet.MSSigning.Extensions
             return packagesToSign;
         }
 
-        private CngKey GetPrivateKey(X509Certificate2 cert)
+        protected CngKey GetPrivateKey(X509Certificate2 cert)
         {
             var rsakey = cert.GetRSAPrivateKey() as RSACng;
 
@@ -132,7 +132,7 @@ namespace NuGet.MSSigning.Extensions
             return cngkey;
         }
 
-        private X509Certificate2 GetCertificate(X509Certificate2Collection certCollection)
+        protected X509Certificate2 GetCertificate(X509Certificate2Collection certCollection)
         {
             var matchingCertCollection = certCollection.Find(X509FindType.FindByThumbprint, CertificateFingerprint, validOnly: false);
 
@@ -144,7 +144,7 @@ namespace NuGet.MSSigning.Extensions
             return matchingCertCollection[0];
         }
 
-        private X509Certificate2Collection GetCertificateCollection()
+        protected X509Certificate2Collection GetCertificateCollection()
         {
             var certCollection = new X509Certificate2Collection();
             certCollection.Import(CertificateFile);
@@ -152,7 +152,7 @@ namespace NuGet.MSSigning.Extensions
             return certCollection;
         }
 
-        private void ValidatePackagePath()
+        protected void ValidatePackagePath()
         {
             // Assert mandatory argument
             if (Arguments.Count < 1 ||
@@ -162,7 +162,7 @@ namespace NuGet.MSSigning.Extensions
             }
         }
 
-        private void WarnIfNoTimestamper(ILogger logger)
+        protected void WarnIfNoTimestamper(ILogger logger)
         {
             if (string.IsNullOrEmpty(Timestamper))
             {
@@ -170,7 +170,7 @@ namespace NuGet.MSSigning.Extensions
             }
         }
 
-        private void EnsureOutputDirectory()
+        protected void EnsureOutputDirectory()
         {
             if (!string.IsNullOrEmpty(OutputDirectory))
             {
@@ -178,7 +178,7 @@ namespace NuGet.MSSigning.Extensions
             }
         }
 
-        private void ValidateCertificateInputs()
+        protected void ValidateCertificateInputs()
         {
             if (string.IsNullOrEmpty(CertificateFile))
             {
@@ -208,7 +208,7 @@ namespace NuGet.MSSigning.Extensions
             }
         }
 
-        private Common.HashAlgorithmName ValidateAndParseHashAlgorithm(string value, string name, SigningSpecifications spec)
+        protected Common.HashAlgorithmName ValidateAndParseHashAlgorithm(string value, string name, SigningSpecifications spec)
         {
             var hashAlgorithm = Common.HashAlgorithmName.SHA256;
 
