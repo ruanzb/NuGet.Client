@@ -245,6 +245,54 @@ namespace NuGet.SolutionRestoreManager
                 duration);
 
             TelemetryActivity.EmitTelemetryEvent(restoreTelemetryEvent);
+
+            var sourceEvent = new SourceEvent();
+        }
+
+        private class SourceEvent : TelemetryEvent
+        {
+            public SourceEvent(PackageSource source, Guid parentId)
+                : base("RestorePackageSource")
+            {
+                this["parentid"] = parentId;
+
+                AddPiiData("source", source.Source);
+                AddPiiData("name", source.Name);
+
+                this["hascredentials"] = (source.Credentials != null);
+                this["islocal"] = source.IsLocal;
+                this["ishttp"] = source.IsHttp;
+                this["isenabled"] = source.IsEnabled;
+                this["ismachinewide"] = source.IsMachineWide;
+
+                if (source.IsHttp)
+                {
+                    this["ishttpv2"] = IsHttpV2(source);
+                    this["ishttpv3"] = IsHttpV3(source);
+
+                    var uri = source.TrySourceAsUri;
+
+                    if (uri != null)
+                    {
+                        this["isnugetorg"] = uri.dom;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(source.Origin?.Root))
+                {
+                    AddPiiData("originroot", source.Origin.Root);
+                }
+            }
+
+            private static bool IsHttpV2(PackageSource source)
+            {
+                return source.IsHttp && !IsHttpV3(source);
+            }
+
+            private static bool IsHttpV3(PackageSource source)
+            {
+                return source.IsHttp && source.Source.EndsWith("index.json", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         private async Task RestorePackageSpecProjectsAsync(
@@ -398,7 +446,7 @@ namespace NuGet.SolutionRestoreManager
                 _status = NuGetOperationStatus.Failed;
 
                 _logger.Do((l, _) =>
-                { 
+                {
                     foreach (var projectName in args.ProjectNames)
                     {
                         var exceptionMessage =
