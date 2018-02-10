@@ -177,7 +177,7 @@ namespace NuGet.CommandLine
         {
             IncludeSymbols = includeSymbols;
         }
-        public bool IncludeSymbols { get; set; } 
+        public bool IncludeSymbols { get; set; }
 
         public bool IncludeReferencedProjects { get; set; }
         public bool Build { get; set; }

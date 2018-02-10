@@ -9,7 +9,7 @@ namespace NuGet.Commands
 {
     public class PackCollectorLogger : LoggerBase
     {
-        public WarningProperties WarningProperties { get; set; }
+        public WarningProperties WarningProperties { get; set; } = new WarningProperties();
         private ILogger _innerLogger;
         public PackCollectorLogger(ILogger innerLogger, WarningProperties warningProperties)
         {

@@ -80,7 +80,7 @@ namespace NuGet.Packaging.Rules {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The value &quot;{0}&quot; for {1} is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
+        ///   Looks up a localized string similar to The value &apos;{0}&apos; for &apos;{1}&apos; is a sample value and should be removed. Replace it with an appropriate value or remove it and rebuild your package..
         /// </summary>
         public static string DefaultSpecValueWarning {
             get {
@@ -98,7 +98,7 @@ namespace NuGet.Packaging.Rules {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency &quot;{0}&quot; or update the version field in the nuspec..
+        ///   Looks up a localized string similar to A stable release of a package should not have a prerelease dependency. Either modify the version spec of dependency &apos;{0}&apos; or update the version field in the nuspec..
         /// </summary>
         public static string InvalidPrereleaseDependencyWarning {
             get {

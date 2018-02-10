@@ -29,7 +29,7 @@ namespace NuGet.Packaging.Rules
                 }
                 else
                 {
-                    string name = Path.GetFileNameWithoutExtension(file);
+                    var name = Path.GetFileNameWithoutExtension(file);
                     if (!name.Equals("install", StringComparison.OrdinalIgnoreCase) &&
                         !name.Equals("uninstall", StringComparison.OrdinalIgnoreCase) &&
                         !name.Equals("init", StringComparison.OrdinalIgnoreCase))
